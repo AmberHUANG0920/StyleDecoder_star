@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>★★室內空間偏好選擇系統★★</title>
+  <h1 style="text-align: center;"></h1>
+  <header>
+    <h1>★★室內空間偏好選擇系統★★</h1>
+  </header>
+  <div id="login-container" style="text-align: center;">
+    <p>請輸入暱稱進入</p>
+    <p>請務必輸入與上一個系統相同的暱稱，以利資訊的核對，非常感謝您的配合~</p>
+    <input type="text" id="name-input" placeholder="輸入暱稱"><br><br> 
+    <button onclick="startTest()">確認</button>
+    <p id="error-message" style="color:red;"></p>
+  </div>
+
+  <style>
+
+header {
+      background-color: #f0e68c;
+      color: #333;
+      padding: 24px;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    body {
+      font-family: 'Noto Sans TC', sans-serif;
+      padding: 40px;
+      line-height: 1.6;
+      background: #fafafa;
+      color: #333;
+    }
+
+    h2 {
+      font-size: 20px;
+      margin-bottom: 10px;
+      font-weight: 600;
+      border-bottom: 2px solid #ddd;
+      padding-bottom: 4px;
+      text-align: center;
+    }
+
+    .image-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    #colorDesc {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .image-grid img {
+      width: 100%;
+      border: 8px solid transparent;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: border 0.2s ease;
+    }
+
+    .image-grid img:hover {
+      border-color: #aaa;
+    }
+
+    .image-grid img.selected {
+      border-color: #ff9b21;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    #resultImage {
+    max-width: 90vw;
+    width: 800px;
+    margin-top: 20px;
+    display: block;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  button {
+      display: block;
+      width: 100%;
+      max-width: 320px;
+      margin: 12px auto;
+      background-color: #e9d04f;
+      color: white;
+      padding: 14px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      transition: background-color 0.2s ease;
+    }
+
+    button:hover {
+      background-color: #c9aa0f;
+    }
+
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+
+    .btn-group {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    /* 整個 summary 文字置中 */
+    #summary {
+      text-align: center;
+    }
+
+    /* 圖片塊要水平置中（block + auto margin） */
+    #summary img {
+      display: block;
+      margin: 20px auto 0;
+    }
+
+    /* 如果之後有按鈕，也想要置中： */
+    #summary .btn-group {
+      justify-content: center;
+    }
+
+    /* 手機版：單欄顯示 */
+    @media only screen and (max-width: 768px) {
+      .image-grid {
+        /* 一行只顯示 1 張 */
+        grid-template-columns: 1fr !important;
+      }
+      /* 如果你希望按鈕也能撐滿整行 */
+      button {
+        max-width: none;
+        margin: 12px 0; /* 左右 0 */
+      }
+      .image-grid img {
+        width: auto;
+        max-width: 60%;
+        margin: 0 auto;
+      }
+    }
+
+  </style>
+</head>
+  <!-- 隱藏的 iframe（用來接收 form 回應）-->
+  <iframe name="hidden_iframe" style="display:none;"></iframe>
+
+  <!-- 隱藏的 Google Form，注意這裡要有 <form> 開頭 -->
+<form id="hiddenGoogleForm"
+    action="https://docs.google.com/forms/d/e/1FAIpQLSeCWWszRTPRXATl5-lKslSqVVvGUYnloI_ZOIC_JQUc5e-ggg/formResponse"
+    method="POST"
+    target="hidden_iframe"
+    style="display:none;">
+    <input type="text" name="entry.1968928024" id="hiddenName" />
+    <input type="text" name="entry.554828695" id="hiddenResult" />
+</form>
+</form>
+<body>
+<div id="selector-container" class="hidden">
+  <h2 id="layoutTitle">請選擇5張你喜歡的圖片（空間布局）</h2>
+  <div id="layout" class="image-grid"></div>
+  <h2 id="atmosphereTitle" class="hidden">請選擇5張你喜歡的圖片（空間氛圍）</h2>
+  <div id="atmosphere" class="image-grid hidden"></div>
+  <h2 id="colorDescTitle" class="hidden">請選擇1張你喜歡的圖片（色彩）</h2>
+  <div id="colorDesc" class="image-grid hidden"></div>
+  <div id="summary" class="hidden">
+    <h2>下圖為您的偏好分析結果</h2>
+    <p>建議您截圖保存唷~</p>
+    <p>
+      感謝您的測試，請到這邊幫我
+      <a href="#" onclick="goToBQuestionnaire()">填寫問卷</a>
+      ，非常感謝！(小小提醒~問卷填寫完畢還有滿意度問卷唷~)
+    </p>
+    <!-- <p id="textResult"></p> -->
+    <img id="resultImage" src="">
+</div>
+
+<script>
+
+// 從網址抓取 nickname（如果有）
+function getNicknameFromURL() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("nickname") || "";
+}
+
+let userName = '';
+
+window.addEventListener("DOMContentLoaded", () => {
+  const fromURL = getNicknameFromURL();
+  if (fromURL) {
+    document.getElementById('name-input').value = fromURL;
+  }
+});
+
+function startTest() {
+  let name = document.getElementById('name-input').value.trim();
+  const error = document.getElementById('error-message');
+
+  if (!name) {
+    name = getNicknameFromURL();
+    if (!name) {
+      error.textContent = '請輸入暱稱';
+      return;
+    }
+    document.getElementById('name-input').value = name;
+  }
+
+  // 存起來給後面送表單、跳下一份問卷用
+  userName = name;
+
+  // --------- 這裡加：把暱稱塞到網址 ---------
+  const newUrl = window.location.pathname + '?nickname=' + encodeURIComponent(name);
+  history.replaceState(null, '', newUrl);
+  // ------------------------------------------
+
+  // 隱藏輸入區、顯示選圖區
+  document.getElementById('login-container').style.display = 'none';
+  document.getElementById('selector-container').classList.remove('hidden');
+}
+
+  const config = {
+    layout: {
+      options: [
+        { zh: '密集', en: 'dense' },
+        { zh: '標準', en: 'standard' },
+        { zh: '分散', en: 'loose' }
+      ],
+      count: 5,
+      folder: () => './pic/'
+    },
+    atmosphere: {
+      options: [
+        { zh: '裝飾複雜', en: 'ornate' },
+        { zh: '裝飾簡單', en: 'plain' },
+        { zh: '弧度', en: 'arc-min' },
+        { zh: '線條方正', en: 'rect' },
+        { zh: '無明顯輪廓', en: 'blur' }
+      ],
+      count: 3,
+      folder: () => './pic/'
+    },
+    colorDesc: {
+      options: [
+        { zh: '冷硬 × 單一色', en: 'hard_mono' },
+        { zh: '冷硬 × 雙色', en: 'hard_duo' },
+        { zh: '冷硬 × 低對比多色', en: 'hard_lowmulti' },
+        { zh: '冷硬 × 高對比多色', en: 'hard_highmulti' },
+        { zh: '中和 × 單一色', en: 'neutral_mono' },
+        { zh: '中和 × 雙色', en: 'neutral_duo' },
+        { zh: '中和 × 低對比多色', en: 'neutral_lowmulti' },
+        { zh: '中和 × 高對比多色', en: 'neutral_highmulti' },
+        { zh: '柔和 × 單一色', en: 'soft_mono' },
+        { zh: '柔和 × 雙色', en: 'soft_duo' },
+        { zh: '柔和 × 低對比多色', en: 'soft_lowmulti' },
+        { zh: '柔和 × 高對比多色', en: 'soft_highmulti' }
+      ],
+      count: 1,
+      folder: () => './pic/'
+    }
+  };
+  
+  const labelMap = {
+    layout: { dense: '密集', standard: '標準', loose: '分散' },
+    atmosphere: {
+      ornate: '裝飾複雜',
+      plain: '裝飾簡單',
+      'arc-min': '弧度線條',
+      rect: '線條方正',
+      blur: '無明顯輪廓'
+    },
+    colorDescMaterial: { hard: '冷硬', neutral: '中性', soft: '柔和' },
+    colorDescColor: {
+      mono: '單一色',
+      duo: '雙色',
+      lowmulti: '低對比多色',
+      highmulti: '高對比多色'
+    }
+  };
+  
+  let selections = { layout: [], atmosphere: [], colorDesc: null };
+  let resolvedCategory = { layout: null, atmosphere: null };
+  let tiedSelections = {};
+  
+  function createImage(src, group, layer, container) {
+    const img = document.createElement('img');
+    img.src = src;
+    img.dataset.group = group;
+    img.addEventListener('click', () => {
+      if (layer === 'colorDesc') {
+        if (selections[layer]) selections[layer].classList.remove('selected');
+        img.classList.add('selected');
+        selections[layer] = img;
+      } else {
+        if (img.classList.contains('selected')) {
+          img.classList.remove('selected');
+          selections[layer] = selections[layer].filter(i => i !== img);
+        } else if (selections[layer].length < 5) {
+          img.classList.add('selected');
+          selections[layer].push(img);
+        }
+      }
+    });
+    container.appendChild(img);
+  }
+  
+  function resolveTie(images, layerName, nextLayerName) {
+    tiedSelections[layerName] = images.slice();
+    const container = document.getElementById(layerName);
+    const titleEl = document.getElementById(layerName + 'Title');
+    container.innerHTML = '';
+    titleEl.textContent = '你選擇的圖片中有多種結果並列，請從下列圖片中選出你最喜歡的一張：';
+    container.classList.remove('hidden');
+    titleEl.classList.remove('hidden');
+    let selectedImg = null;
+    images.forEach(img => {
+      const clone = img.cloneNode(true);
+      clone.classList.remove('selected');
+      clone.addEventListener('click', () => {
+        if (selectedImg) selectedImg.classList.remove('selected');
+        clone.classList.add('selected');
+        selectedImg = clone;
+      });
+      container.appendChild(clone);
+    });
+    const confirmWrapper = document.createElement('div');
+    confirmWrapper.style.textAlign = 'center';
+    confirmWrapper.style.marginTop = '30px';
+    const confirmBtn = document.createElement('button');
+    confirmBtn.textContent = '確定';
+    confirmBtn.style.width = '100%';
+    confirmBtn.style.maxWidth = '320px';
+    confirmBtn.onclick = () => {
+      if (!selectedImg) {
+        alert('請選擇一張圖片後再按確定！');
+        return;
+      }
+      resolvedCategory[layerName] = selectedImg.dataset.group;
+      selections[layerName] = [selectedImg];
+      confirmWrapper.remove();
+      container.classList.add('hidden');
+      titleEl.classList.add('hidden');
+      document.getElementById(nextLayerName + 'Title').classList.remove('hidden');
+      document.getElementById(nextLayerName).classList.remove('hidden');
+    };
+    confirmWrapper.appendChild(confirmBtn);
+    container.insertAdjacentElement('afterend', confirmWrapper);
+  }
+  
+  function loadLayer(layerName, nextLayerName) {
+    const configLayer = config[layerName];
+    const container = document.getElementById(layerName);
+    container.innerHTML = '';
+    for (const option of configLayer.options) {
+      for (let i = 1; i <= configLayer.count; i++) {
+        const fileName = layerName === 'colorDesc'
+          ? option.en + '.png'
+          : option.en + '-' + i + '.png';
+        const src = (layerName === 'colorDesc'
+          ? configLayer.folder()
+          : configLayer.folder(option.en)) + fileName;
+        createImage(src, option.en, layerName, container);
+      }
+    }
+    const btnContainer = document.createElement('div');
+    btnContainer.className = 'btn-group';
+    if (layerName !== 'layout') {
+      const backBtn = document.createElement('button');
+      backBtn.textContent = '上一步';
+      backBtn.onclick = () => {
+        container.classList.add('hidden');
+        document.getElementById(layerName + 'Title').classList.add('hidden');
+        const prevLayer = layerName === 'atmosphere' ? 'layout' : 'atmosphere';
+        if (tiedSelections[prevLayer]) {
+          resolveTie(tiedSelections[prevLayer], prevLayer, layerName);
+        } else {
+          document.getElementById(prevLayer).classList.remove('hidden');
+          document.getElementById(prevLayer + 'Title').classList.remove('hidden');
+        }
+      };
+      btnContainer.appendChild(backBtn);
+    }
+    const nextBtn = document.createElement('button');
+    nextBtn.textContent = '下一步';
+    nextBtn.onclick = () => {
+      const selectedCount = layerName === 'colorDesc'
+        ? (selections[layerName] ? 1 : 0)
+        : selections[layerName].length;
+      const requiredCount = layerName === 'colorDesc' ? 1 : 5;
+      if (selectedCount < requiredCount) {
+        alert('請選擇 ' + requiredCount + ' 張圖片後再進行下一步！');
+        return;
+      }
+      if (selectedCount > requiredCount) {
+        alert('只能選擇 ' + requiredCount + ' 張圖片，請取消多餘的選擇。');
+        return;
+      }
+      if (layerName !== 'colorDesc') {
+        const counts = {};
+        selections[layerName].forEach(img => {
+          const key = img.dataset.group;
+          counts[key] = (counts[key] || 0) + 1;
+        });
+        const maxCount = Math.max.apply(null, Object.values(counts));
+        const topCats = Object.keys(counts).filter(k => counts[k] === maxCount);
+        if (topCats.length > 1) {
+          const tied = selections[layerName].filter(img =>
+            topCats.includes(img.dataset.group)
+          );
+          return resolveTie(tied, layerName, nextLayerName);
+        }
+        resolvedCategory[layerName] = topCats[0];
+      }
+      container.classList.add('hidden');
+      document.getElementById(layerName + 'Title').classList.add('hidden');
+      if (layerName === 'colorDesc') {
+        showResult();
+      } else {
+        document.getElementById(nextLayerName + 'Title').classList.remove('hidden');
+        document.getElementById(nextLayerName).classList.remove('hidden');
+      }
+    };
+    btnContainer.appendChild(nextBtn);
+    container.appendChild(btnContainer);
+  }
+  
+  function showResult() {
+    if (!selections.colorDesc) {
+      alert('請選擇一張色彩圖片！');
+      return;
+    }
+    const topL = resolvedCategory.layout;
+    const topA = resolvedCategory.atmosphere;
+    const color = selections.colorDesc.dataset.group;
+    const parts = color.split('_'); // parts[0] = material, parts[1] = color
+    document.getElementById('summary').classList.remove('hidden');
+    // document.getElementById('textResult').innerHTML =
+    //   '空間布局：' + labelMap.layout[topL] + '<br>' +
+    //   '空間氛圍特徵：' + labelMap.atmosphere[topA] + '<br>' +
+    //   '材質：' + labelMap.colorDescMaterial[parts[0]] + '<br>' +
+    //   '顏色：' + labelMap.colorDescColor[parts[1]];
+      document.getElementById('resultImage').src =
+      './final/' + topL + '_' + topA + '_' + parts[1] + '_' + parts[0] + '.png';
+        
+      // 組成要送的字串
+      const summaryString =
+        '空間布局：' + labelMap.layout[topL] +
+        '; 空間氛圍：' + labelMap.atmosphere[topA] +
+        '; 材質：' + labelMap.colorDescMaterial[parts[0]] +
+        '; 顏色：' + labelMap.colorDescColor[parts[1]];
+
+      // 塞進隱藏表單
+      document.getElementById('hiddenName').value   = userName;
+      document.getElementById('hiddenResult').value = summaryString;
+
+      // 送出表單
+      document.getElementById('hiddenGoogleForm').submit();
+  }
+  
+  loadLayer('layout', 'atmosphere');
+  loadLayer('atmosphere', 'colorDesc');
+  loadLayer('colorDesc', 'summary');
+
+  function submitToGoogleForm(name, selectionString) {
+  const formURL = 'https://docs.google.com/forms/d/e/1FAIpQLSeCWWszRTPRXATl5-lKslSqVVvGUYnloI_ZOIC_JQUc5e-ggg/formResponse';
+  const formData = new FormData();
+  formData.append('entry.1968928024', name);              // 暱稱
+  formData.append('entry.554828695', selectionString);   // 結果
+
+  fetch(formURL, {
+    method: 'POST',
+    mode: 'no-cors',
+    body: formData
+  }).then(() => {
+    console.log('✅ 表單送出成功');
+  }).catch(err => {
+    console.error('❌ 表單送出失敗', err);
+  });
+}
+//放問卷
+function goToBQuestionnaire() {
+  const nickname = userName || getNicknameFromURL();
+  console.log("✅ goToBQuestionnaire 取得暱稱：", nickname);  // ⬅️ 新增
+  const formUrl = "https://docs.google.com/forms/d/e/1FAIpQLSdtgX3mTLvadnBNC3RDUihkjFhC9sU4OpSxNRVFthduZHJBBg/viewform?usp=pp_url&entry.1866328551=" + encodeURIComponent(nickname);
+  window.location.href = formUrl;
+}
+
+// window.addEventListener("DOMContentLoaded", () => {
+//   userName = getNicknameFromURL(); // 直接從網址取得 nickname
+//   document.getElementById('selector-container').style.display = 'block';
+//   renderOptions(0);
+// });
+  </script>
+  </div>
+</body>
+</html>
