@@ -1,0 +1,25 @@
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>跳轉中...</title>
+  <script>
+    window.onload = () => {
+      const params = new URLSearchParams(window.location.search);
+      const target = params.get("target");     // 目標頁面，例如 a.html、b.html
+      const nickname = params.get("nickname"); // 使用者暱稱
+
+      if (target && nickname) {
+        const url = `${target}?nickname=${encodeURIComponent(nickname)}`;
+        window.location.href = url;
+      } else {
+        document.body.innerHTML = "<h1>❌ 缺少參數，無法跳轉</h1>";
+      }
+    };
+  </script>
+</head>
+<body>
+  <p>跳轉中，請稍後...</p>
+</body>
+</html>

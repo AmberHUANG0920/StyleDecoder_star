@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>♡♡室內空間偏好選擇系統♡♡</title>
+
+  <link rel="stylesheet" href="style.css">
+  <style>
+    header {
+      background-color: #f0e68c;
+      color: #333;
+      padding: 24px;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .img-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      backdrop-filter: blur(8px);
+      background-color: rgba(0, 0, 0, 0.2);
+      z-index: 999;
+      pointer-events: none;
+    }
+    .img-popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(1);
+      transition: transform 0.3s ease;
+      z-index: 1000;
+      border-radius: 6px;
+      max-width: 90vw;
+      max-height: 90vh;
+      object-fit: contain;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+      pointer-events: none;
+    }
+
+    button {
+      display: block;
+      width: 100%;
+      max-width: 320px;
+      margin: 12px auto;
+      background-color: #e9d04f;
+      color: white;
+      padding: 14px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      transition: background-color 0.2s ease;
+    }
+  </style>
+</head>
+<!-- 隱藏的 iframe（用來接收 form 回應）-->
+<iframe name="hidden_iframe" style="display:none;"></iframe>
+
+<!-- 隱藏的 Google Form，注意這裡要有 <form> 開頭 -->
+<form id="hiddenGoogleForm"
+  action="https://docs.google.com/forms/d/e/1FAIpQLSdawbFD-iM0l6mwpxNK7v-9OEydlhFDHUl_oDBplLbrFnKD3g/formResponse"
+  method="POST"
+  target="hidden_iframe"
+  style="display:none;">
+  <input type="text" name="entry.2070893556" id="hiddenName" />
+  <input type="text" name="entry.490872160" id="hiddenResult" />
+</form>
+</form>
+<body>
+  <header>
+    <h1>♡♡室內空間偏好選擇系統♡♡</h1>
+  </header>
+  <div id="login-container" style="text-align: center;">
+    <p>請輸入暱稱進入</p>
+    <p>請務必輸入與上一個系統相同的暱稱，以利資訊的核對，非常感謝您的配合~</p>
+    <input type="text" id="name-input" placeholder="輸入暱稱"><br><br> 
+    <button onclick="startTest()">確認</button>
+    <p id="error-message" style="color:red;"></p>
+  </div>
+  <!-- <div id="login-container" style="text-align: center;">
+    <p>請輸入密碼與暱稱以進入(麻煩暱稱到時候使用另外一個系統與填寫表單時要統一唷~感謝您)：</p>
+    <input type="password" id="password-input" placeholder="輸入密碼" /><br><br>
+    <input type="text" id="name-input" placeholder="輸入暱稱" /><br><br>
+    <button onclick="checkPassword()">確認</button>
+    <p id="error-message" style="color:red;"></p>
+  </div> -->
+
+  <div id="selector-container" style="display:none;"></div>
+  <div id="result-container">
+    <div id="result"></div>
+  </div>
+
+  <script>
+  // 從網址抓取 nickname（如果有）
+function getNicknameFromURL() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("nickname") || "";
+}
+
+let userName = '';
+
+window.addEventListener("DOMContentLoaded", () => {
+  const fromURL = getNicknameFromURL();
+  if (fromURL) {
+    document.getElementById('name-input').value = fromURL;
+  }
+});
+
+function startTest() {
+  let name = document.getElementById('name-input').value.trim();
+  const error = document.getElementById('error-message');
+
+  if (!name) {
+    name = getNicknameFromURL();
+    if (!name) {
+      error.textContent = '請輸入暱稱';
+      return;
+    }
+    document.getElementById('name-input').value = name;
+  }
+
+  // 存起來給後面送表單、跳下一份問卷用
+  userName = name;
+
+  // --------- 這裡加：把暱稱塞到網址 ---------
+  const newUrl = window.location.pathname + '?nickname=' + encodeURIComponent(name);
+  history.replaceState(null, '', newUrl);
+  // ------------------------------------------
+
+  // 隱藏輸入區、顯示選圖區
+  document.getElementById('login-container').style.display  = 'none';
+  document.getElementById('selector-container').style.display = 'block';
+
+  renderOptions(0);
+}
+//  let userName = '';
+
+// function checkPassword() {
+//   const password = document.getElementById('password-input').value.trim();
+//   const name = document.getElementById('name-input').value.trim();
+//   const error = document.getElementById('error-message');
+//   const correctPassword = '1qaz2wsx';
+
+//   if (password === correctPassword && name !== '') {
+//     userName = name;
+//     document.getElementById('login-container').style.display = 'none';
+//     document.getElementById('selector-container').style.display = 'block';
+//     renderOptions(0);
+//   } else {
+//     error.textContent = '密碼錯誤或暱稱未填寫，請重新輸入';
+//   }
+// }
+
+const options = {
+  layout: [
+    { zh: '密集', en: 'dense' },
+    { zh: '標準', en: 'standard' },
+    { zh: '分散', en: 'loose' }
+  ],
+  atmosphere: [
+    { zh: '裝飾複雜', en: 'ornate' },
+    { zh: '裝飾簡單', en: 'plain' },
+    { zh: '弧度', en: 'arc-min' },
+    { zh: '線條方正', en: 'rect' },
+    { zh: '無明顯輪廓', en: 'blur' }
+  ],
+  colorDesc: [
+    { zh: '冷硬 × 單一色', en: 'hard_mono' },
+    { zh: '冷硬 × 雙色', en: 'hard_duo' },
+    { zh: '冷硬 × 低對比多色', en: 'hard_lowmulti' },
+    { zh: '冷硬 × 高對比多色', en: 'hard_highmulti' },
+    { zh: '中和 × 單一色', en: 'neutral_mono' },
+    { zh: '中和 × 雙色', en: 'neutral_duo' },
+    { zh: '中和 × 低對比多色', en: 'neutral_lowmulti' },
+    { zh: '中和 × 高對比多色', en: 'neutral_highmulti' },
+    { zh: '柔和 × 單一色', en: 'soft_mono' },
+    { zh: '柔和 × 雙色', en: 'soft_duo' },
+    { zh: '柔和 × 低對比多色', en: 'soft_lowmulti' },
+    { zh: '柔和 × 高對比多色', en: 'soft_highmulti' }
+  ],
+  contrast: [
+    { zh: '明亮度高飽和度高', en: 'hb-hs' },
+    { zh: '明亮度高飽和度低', en: 'hb-ls' },
+    { zh: '明亮度低飽和度高', en: 'lb-hs' },
+    { zh: '明亮度低飽和度低', en: 'lb-ls' }
+  ]
+};
+
+const keys = ['layout', 'atmosphere', 'colorDesc', 'contrast'];
+const selections = [];
+let currentStep = 0;
+
+function renderOptions(level) {
+  const container = document.getElementById('selector-container');
+  container.innerHTML = '';
+  document.getElementById('result').innerHTML = '請選擇喜歡的樣式。';
+
+  const layerKey = keys[level];
+  const layerOptions = options[layerKey];
+
+  const div = document.createElement('div');
+  div.className = 'layer';
+  const optionContainer = document.createElement('div');
+  optionContainer.className = 'options';
+
+  if (layerOptions.length === 12) optionContainer.classList.add('grid-4');
+  else if (layerOptions.length === 6) optionContainer.classList.add('grid-3');
+  else if (layerOptions.length === 4) optionContainer.classList.add('grid-2');
+  else optionContainer.classList.add('grid-3');
+
+  layerOptions.forEach(opt => {
+    const item = document.createElement('div');
+    item.className = 'option-item';
+
+    const label = document.createElement('div');
+    label.className = 'option-label';
+    label.textContent = opt.zh;
+
+    const img = document.createElement('img');
+    let filename = '';
+
+    if (level === 1) {
+      filename = `${selections[0].en}_${opt.en}.png`;
+    } else if (level === 2) {
+      const [desc, color] = opt.en.split('_');
+      filename = `${selections[0].en}_${selections[1].en}_${color}_${desc}.png`;
+    } else if (level === 3) {
+      const layout = selections[0].en;
+      const atmosphere = selections[1].en;
+      const [desc, color] = selections[2].en.split('_');
+      filename = `${layout}_${atmosphere}_${color}_${desc}_${opt.en}.png`;
+    } else {
+      filename = `${opt.en}.png`;
+    }
+
+    img.src = `pic/${filename}`;
+    img.alt = filename;
+    img.onerror = function () {
+      this.style.opacity = 0.3;
+      this.alt = '找不到圖片';
+    };
+
+    img.addEventListener('mouseenter', () => {
+      const overlay = document.createElement('div');
+      overlay.classList.add('img-overlay');
+      overlay.id = 'hover-overlay';
+
+      const popup = img.cloneNode(true);
+      popup.classList.add('img-popup');
+      popup.id = 'hover-popup';
+
+      document.body.appendChild(overlay);
+      document.body.appendChild(popup);
+    });
+
+    img.addEventListener('mouseleave', () => {
+      const popup = document.getElementById('hover-popup');
+      const overlay = document.getElementById('hover-overlay');
+      if (popup) popup.remove();
+      if (overlay) overlay.remove();
+    });
+
+    const button = document.createElement('button');
+    button.textContent = '選這個！';
+    button.className = 'back-button';
+    button.addEventListener('click', () => {
+      const popup = document.getElementById('hover-popup');
+      const overlay = document.getElementById('hover-overlay');
+      if (popup) popup.remove();
+      if (overlay) overlay.remove();
+
+      selections[level] = { zh: opt.zh, en: opt.en };
+      currentStep = level + 1;
+
+      if (level === 3) {
+        const layout = selections[0].en;
+        const atmosphere = selections[1].en;
+        const [desc, color] = selections[2].en.split('_');
+        const contrast = selections[3].en;
+        const finalName = `${layout}_${atmosphere}_${color}_${desc}_${contrast}.png`;
+        const zhName = selections.map(s => s.zh).join('、');
+        showResult(finalName, zhName);
+        submitToGoogleForm(userName, zhName);
+      } else {
+        renderOptions(currentStep);
+      }
+    });
+
+    item.appendChild(img);
+    // item.appendChild(label);
+    item.appendChild(button);
+    optionContainer.appendChild(item);
+  });
+
+  div.appendChild(optionContainer);
+
+  if (level > 0) {
+    const backBtn = document.createElement('button');
+    backBtn.textContent = '← 上一層';
+    backBtn.className = 'back-button';
+    backBtn.addEventListener('click', () => {
+      selections.pop();
+      currentStep = level - 1;
+      renderOptions(currentStep);
+    });
+    container.appendChild(backBtn);
+  }
+
+  container.appendChild(div);
+}
+
+function showResult(filename, zhName) {
+  const container = document.getElementById('selector-container');
+  container.innerHTML = '';
+
+  const resultDiv = document.getElementById('result');
+  resultDiv.innerHTML = `
+  <p style="font-weight: bold; font-size: 18px;">感謝你的選擇，以下是你的風格圖片，建議您截圖保存唷~</p>
+  <p style="font-size: 16px;">
+  請幫忙填寫此系統問卷，點擊這裡：
+  <a href="#" onclick="goToBQuestionnaire()">填寫問卷</a>
+      ，非常感謝！
+</p>
+  <img src="pic/${filename}" alt="風格圖片" class="preview" onerror="this.alt='找不到圖片';">
+`;
+
+//   const backBtn = document.createElement('button');
+//   backBtn.textContent = '← 上一層';
+//   backBtn.className = 'back-button';
+//   backBtn.addEventListener('click', () => {
+//     renderOptions(3);
+//   });
+//   container.appendChild(backBtn);
+}
+
+function submitToGoogleForm(name, selectionString) {
+  const formURL = 'https://docs.google.com/forms/d/e/1FAIpQLSdawbFD-iM0l6mwpxNK7v-9OEydlhFDHUl_oDBplLbrFnKD3g/formResponse';
+  const formData = new FormData();
+  formData.append('entry.2070893556', name);              // 暱稱
+  formData.append('entry.490872160', selectionString);   // 結果
+
+  fetch(formURL, {
+    method: 'POST',
+    mode: 'no-cors',
+    body: formData
+  }).then(() => {
+    console.log('✅ 表單送出成功');
+  }).catch(err => {
+    console.error('❌ 表單送出失敗', err);
+  });
+}
+//放問卷
+function goToBQuestionnaire() {
+  const nickname = userName || getNicknameFromURL();
+  console.log("✅ goToBQuestionnaire 取得暱稱：", nickname);  // ⬅️ 新增
+  const formUrl = "https://docs.google.com/forms/d/e/1FAIpQLSd35pdTTariboeeKAuMvM6FJuto5a7AaOUj_rgiy1TUoKSzUw/viewform?usp=pp_url&entry.258648634=" + encodeURIComponent(nickname);
+  window.location.href = formUrl;
+}
+
+// window.addEventListener("DOMContentLoaded", () => {
+//   userName = getNicknameFromURL(); // 直接從網址取得 nickname
+//   document.getElementById('selector-container').style.display = 'block';
+//   renderOptions(0);
+// });
+</script>
+</body>
+</html>

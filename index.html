@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>室內空間偏好選擇系統-說明</title>
+  <style>
+    body {
+      font-family: 'Noto Sans TC', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f6f6f6;
+      color: #333;
+    }
+
+    header {
+      background-color: #f0e68c;
+      color: #333;
+      padding: 24px;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 28px;
+    }
+
+    .container {
+      max-width: 760px;
+      margin: 40px auto;
+      background: #fff;
+      padding: 32px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+
+    h2 {
+      color: #555;
+      font-size: 22px;
+      margin-top: 30px;
+    }
+
+    p, li {
+      line-height: 1.8;
+      font-size: 16px;
+    }
+
+    ol, ul {
+      padding-left: 20px;
+    }
+
+    input {
+      padding: 10px;
+      font-size: 16px;
+      width: 240px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #f4b400;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 12px;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background-color: #c48f00;
+    }
+
+    #start-test {
+      display: none;
+    }
+
+    #error-message {
+      color: red;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 60px;
+      margin-bottom: 40px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>室內空間偏好選擇系統-注意事項與說明</h1>
+  </header>
+
+  <div class="container">
+    <h2>✨ 研究說明</h2>
+    <p>謝謝您願意參與本研究！（提醒：本研究<strong>僅支援電腦操作</strong>）</p>
+    <p>本研究旨在探討<strong>圖片選擇系統是否能改善室內設計溝通問題</strong>。</p>
+    <p>透過<strong>直覺式圖片選擇</strong>的方式，協助使用者更精準傳達風格偏好，研究針對小坪數住宅（約10–15坪）進行風格分類與測試。</p>
+    <p><strong>請依照個人審美與直覺自由選擇圖片，不需考慮現實限制。</strong></p>
+
+    <h2>🧭 測驗流程如下：</h2>
+    <ol>
+      <li>進入<strong>第一段圖片選擇</strong> → 完成後填寫問卷</li>
+      <li>進入<strong>第二段圖片選擇</strong> → 完成後填寫問卷</li>
+    </ol>
+    <p>📌 全程約 10–15 分鐘，請一次完成操作。</p>
+
+    <h2>📝 注意事項：</h2>
+    <ul>
+      <li>請使用<strong>電腦</strong>操作</li>
+      <li>總共會輸入兩次暱稱，<strong>暱稱請填寫一致</strong>否則結果將會作廢</li>
+      <li>不需填寫真實姓名，<strong>請記住所填暱稱</strong></li>
+      <li>所有資料僅供學術使用，<strong>全程匿名</strong></li>
+      <li>無對錯之分，依個人喜好作答即可</li>
+    </ul>
+
+    <hr>
+
+    <div id="login-container">
+      <p>請輸入密碼與暱稱進入(要記得自己取的暱稱唷~)</p>
+      <input type="password" id="password-input" placeholder="輸入密碼"><br>
+      <input type="text" id="name-input" placeholder="輸入暱稱"><br>
+      <button onclick="checkPassword()">確認</button>
+      <p id="error-message"></p>
+    </div>
+
+    <button id="start-test" onclick="startTest()">開始</button>
+  </div>
+
+  <div class="footer">
+    <a href="https://lin.ee/jjptqEG">
+      <img src="https://scdn.line-apps.com/n/line_add_friends/btn/zh-Hant.png" alt="加入好友" height="36" border="0">
+    </a>
+    <p style="margin-top: 12px; font-size: 15px; color: #555;">若系統操作上有任何問題，請加入官方帳號詢問，謝謝。</p>
+  </div>
+
+  <iframe name="hidden_iframe" style="display:none;"></iframe>
+
+  <form id="hiddenGoogleForm"
+        action="https://docs.google.com/forms/d/e/1FAIpQLSfKvumCA5_DK8pcD52f-2ClcOvMdLHE2fVlaWvxanzyEIm7nw/formResponse"
+        method="POST"
+        target="hidden_iframe"
+        style="display:none;">
+        <input type="text" name="entry.1102491846" id="hiddenName" />
+        <input type="text" name="entry.1031251146" id="hiddenResult" />
+  </form>
+
+  <script>
+    const CORRECT_PASSWORD = 'picksth111';
+    let selectedUrl = '';
+
+    function checkPassword() {
+      const password = document.getElementById('password-input').value;
+      const name = document.getElementById('name-input').value;
+      const error = document.getElementById('error-message');
+      const startButton = document.getElementById('start-test');
+
+      if (!password || !name) {
+        error.textContent = '請輸入密碼與暱稱';
+        return;
+      }
+
+      if (password !== CORRECT_PASSWORD) {
+        error.textContent = '密碼錯誤，請再試一次';
+        return;
+      }
+
+      if (password === CORRECT_PASSWORD) {
+       // 隱藏「確認」按鈕
+        document.querySelector('#login-container button[onclick="checkPassword()"]')
+            .style.display = 'none';
+        // 顯示「開始測驗」
+        document.getElementById('start-test').style.display = 'inline-block';
+      }
+
+      const urls = [
+        "jump.html?target=StyleDecoder_A/index_a1.html",
+        "jump.html?target=StyleDecoder_B/index_b2.html"
+      ];
+      
+      const selected = urls[Math.floor(Math.random() * urls.length)];
+      selectedUrl = selected + "&nickname=" + encodeURIComponent(name);
+
+      document.getElementById('hiddenName').value = name;
+      document.getElementById('hiddenResult').value = selectedUrl;
+      document.getElementById('hiddenGoogleForm').submit();
+
+      startButton.style.display = 'inline-block';
+      error.textContent = '';
+    }
+
+    function startTest() {
+      window.location.href = selectedUrl;
+    }
+  </script>
+</body>
+</html>
