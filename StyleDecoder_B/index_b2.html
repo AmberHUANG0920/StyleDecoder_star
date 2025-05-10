@@ -302,7 +302,7 @@ function startTest() {
         if (img.classList.contains('selected')) {
           img.classList.remove('selected');
           selections[layer] = selections[layer].filter(i => i !== img);
-        } else if (selections[layer].length < 5) {
+        } else if (selections[layer].length < 4) {
           img.classList.add('selected');
           selections[layer].push(img);
         }
@@ -393,7 +393,7 @@ function startTest() {
       const selectedCount = layerName === 'colorDesc'
         ? (selections[layerName] ? 1 : 0)
         : selections[layerName].length;
-      const requiredCount = layerName === 'colorDesc' ? 1 : 5;
+      const requiredCount = layerName === 'colorDesc' ? 1 : 4;
       if (selectedCount < requiredCount) {
         alert('請選擇 ' + requiredCount + ' 張圖片後再進行下一步！');
         return;

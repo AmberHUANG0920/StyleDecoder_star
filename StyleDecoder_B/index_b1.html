@@ -165,9 +165,9 @@ header {
 </form>
 <body>
 <div id="selector-container" class="hidden">
-  <h2 id="layoutTitle">請選擇5張你喜歡的圖片（空間布局）</h2>
+  <h2 id="layoutTitle">請選擇4張你喜歡的圖片（空間布局）</h2>
   <div id="layout" class="image-grid"></div>
-  <h2 id="atmosphereTitle" class="hidden">請選擇5張你喜歡的圖片（空間氛圍）</h2>
+  <h2 id="atmosphereTitle" class="hidden">請選擇4張你喜歡的圖片（空間氛圍）</h2>
   <div id="atmosphere" class="image-grid hidden"></div>
   <h2 id="colorDescTitle" class="hidden">請選擇1張你喜歡的圖片（色彩）</h2>
   <div id="colorDesc" class="image-grid hidden"></div>
@@ -302,7 +302,7 @@ function startTest() {
         if (img.classList.contains('selected')) {
           img.classList.remove('selected');
           selections[layer] = selections[layer].filter(i => i !== img);
-        } else if (selections[layer].length < 5) {
+        } else if (selections[layer].length < 4) {
           img.classList.add('selected');
           selections[layer].push(img);
         }
@@ -393,7 +393,7 @@ function startTest() {
       const selectedCount = layerName === 'colorDesc'
         ? (selections[layerName] ? 1 : 0)
         : selections[layerName].length;
-      const requiredCount = layerName === 'colorDesc' ? 1 : 5;
+      const requiredCount = layerName === 'colorDesc' ? 1 : 4;
       if (selectedCount < requiredCount) {
         alert('請選擇 ' + requiredCount + ' 張圖片後再進行下一步！');
         return;
