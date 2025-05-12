@@ -34,7 +34,7 @@
   </style>
 </head>
 <body>
-  <h1 style="text-align: center;">風格圖片選擇器</h1>
+  <h1 style="text-align: center;">請選擇一張你最喜歡的<br><span style="font-size: 18px;">📌 請等所有圖片皆載入完成後，再進行選擇。</span></h1>
 
   <!-- <div id="login-container" style="text-align: center;">
     <p>請輸入密碼與暱稱以進入(麻煩暱稱到時候使用另外一個系統與填寫表單時要統一唷~感謝您)：</p>
@@ -124,7 +124,7 @@ let currentStep = 0;
 function renderOptions(level) {
   const container = document.getElementById('selector-container');
   container.innerHTML = '';
-  document.getElementById('result').innerHTML = '請選擇喜歡的樣式。';
+  document.getElementById('result').innerHTML = '';
 
   const layerKey = keys[level];
   const layerOptions = options[layerKey];

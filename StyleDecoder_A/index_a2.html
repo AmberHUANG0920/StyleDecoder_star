@@ -89,7 +89,9 @@
     <p id="error-message" style="color:red;"></p>
   </div> -->
 
-  <div id="selector-container" style="display:none;"></div>
+  <div id="selector-container" style="display:none;">
+    <h1 style="text-align: center;">請選擇一張你最喜歡的<br><span style="font-size: 18px;">📌 請等所有圖片皆載入完成後，再進行選擇。</span></h1>
+  </div>
   <div id="result-container">
     <div id="result"></div>
   </div>
@@ -112,6 +114,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
 function startTest() {
   let name = document.getElementById('name-input').value.trim();
+  document.querySelector('header').style.display = 'none'; // 
   const error = document.getElementById('error-message');
 
   if (!name) {
@@ -197,7 +200,27 @@ let currentStep = 0;
 function renderOptions(level) {
   const container = document.getElementById('selector-container');
   container.innerHTML = '';
-  document.getElementById('result').innerHTML = '請選擇喜歡的樣式。';
+  document.getElementById('result').innerHTML = '';
+
+  // 🔽 插入提示區塊
+  const titleWrapper = document.createElement('div');
+  titleWrapper.style.textAlign = 'center';
+  titleWrapper.style.marginBottom = '16px';
+
+  const mainTitle = document.createElement('h2');
+  mainTitle.textContent = '請選擇一張你最喜歡的';
+  mainTitle.style.fontSize = '30px';
+  mainTitle.style.fontWeight = 'bold';
+  mainTitle.style.marginBottom = '8px';
+  titleWrapper.appendChild(mainTitle);
+
+  const hint = document.createElement('p');
+  hint.innerHTML = '📌 <span>請等所有圖片皆載入完成後，再進行選擇。</span>';
+  hint.style.fontSize = '16px';
+  hint.style.margin = '0';
+  titleWrapper.appendChild(hint);
+
+  container.appendChild(titleWrapper);
 
   const layerKey = keys[level];
   const layerOptions = options[layerKey];

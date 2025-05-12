@@ -165,12 +165,23 @@ header {
 </form>
 <body>
 <div id="selector-container" class="hidden">
-  <h2 id="layoutTitle">請選擇4張你喜歡的"空間感"</h2>
+  <h2 id="layoutTitle">
+  <span style="font-size: 30px;">請選擇4張你喜歡的"空間感"<br></span>
+  <span style="font-size: 18px;">📌 請等所有圖片皆載入完成後，再進行選擇。</span>
+  </h2>
   <div id="layout" class="image-grid"></div>
-  <h2 id="atmosphereTitle" class="hidden">請選擇4張你喜歡的"造型感"</h2>
+  
+  <h2 id="atmosphereTitle" class="hidden">
+  <span style="font-size: 30px;">請選擇4張你喜歡的"造型感" <br></span>
+  <span style="font-size: 18px;">📌 請等所有圖片皆載入完成後，再進行選擇。</span></h2>
   <div id="atmosphere" class="image-grid hidden"></div>
-  <h2 id="colorDescTitle" class="hidden">請選擇1張你"最"喜歡的</h2>
-  <div id="colorDesc" class="image-grid hidden"></div>
+
+  <h2 id="colorDescTitle" class="hidden">
+  <span style="font-size: 30px;">請選擇1張你"最"喜歡的<br></span>
+  <span style="font-size: 18px;">📌 請等所有圖片皆載入完成後，再進行選擇。</span></h2>
+  <div id="colorDesc" class="image-grid hidden"></div>>
+  
+  
   <div id="summary" class="hidden">
     <h2>下圖為您的偏好分析結果</h2>
     <p>建議您截圖保存唷~</p>
@@ -203,6 +214,7 @@ window.addEventListener("DOMContentLoaded", () => {
 function startTest() {
   let name = document.getElementById('name-input').value.trim();
   const error = document.getElementById('error-message');
+  document.querySelector('header').style.display = 'none';
 
   if (!name) {
     name = getNicknameFromURL();
